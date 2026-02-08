@@ -1,5 +1,5 @@
 # 💫 About Me:
-Hi, I’m Jason Avalos — a Computer Science student at California State University, Fresno who enjoys building practical software with a focus on usability and real-world impact. I’m currently working on Parking Pal, a team-built app that connects a PostgreSQL database with a FastAPI backend and a modern frontend, with attention to clean UX and accessibility (including an English/Español toggle). I’m most comfortable in C++ and Python, and I like blending engineering with creativity through design and visual tools. Outside of tech, I’m driven by education, art, and health — they shape how I learn, build, and collaborate.
+Hi, I’m Jason Avalos a Computer Science student at California State University, Fresno who enjoys building practical software with a focus on usability and real-world impact. I’m currently working on Parking Pal, a team-built app that connects a PostgreSQL database with a FastAPI backend and a modern frontend, with attention to clean UX and accessibility. I’m most comfortable in C++ and Python, and I like blending engineering with creativity through design and visual tools. Outside of tech, I’m driven by education, art, and health, they shape how I learn, build, and collaborate.
 
 
 ## 🌐 Socials:

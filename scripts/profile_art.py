@@ -106,18 +106,23 @@ def heatmap(days, stats):
     return svg(width, 160, s, 'Dexless contribution calendar')
 
 def portrait():
-    color = ImageOps.fit(Image.open(ROOT/'assets/avatar.jpg').convert('RGB'), (180, 96))
+    # Sample the complete square image; non-square character cells correct
+    # the grid's aspect ratio when rendered in the 800 x 800 art area.
+    square = ImageOps.pad(Image.open(ROOT/'assets/avatar.jpg').convert('RGB'), (800, 800))
+    color = square.resize((180, 96), Image.Resampling.LANCZOS)
     im = color.convert('L')
     im = ImageEnhance.Contrast(ImageOps.autocontrast(im)).enhance(1.3)
     ramp = ' .,:;irsXA253hMHGS#9B&@'
     s = window('whoami')
+    s += '<defs><clipPath id="portrait-bounds"><rect x="20" y="40" width="800" height="800"/></clipPath></defs><g clip-path="url(#portrait-bounds)">'
     for y in range(96):
         line = ''
         for x in range(180):
             r, g, b = color.getpixel((x, y))
             background = g > r * 1.08 and g > b * 1.04
             line += ' ' if background else ramp[im.getpixel((x,y))*(len(ramp)-1)//255]
-        s += text(20, 51+y*8.33, line, 7.4, '#c9d1d9', f'class="row" xml:space="preserve" textLength="800" lengthAdjust="spacingAndGlyphs" style="animation-delay:{y*.06:.2f}s"')
+        s += text(20, 47.4+y*(800/96), line, 7.4, '#c9d1d9', f'class="row" xml:space="preserve" textLength="800" lengthAdjust="spacingAndGlyphs" style="animation-delay:{y*.06:.2f}s"')
+    s += '</g>'
     s += text(20, 860, 'Jason Avalos · Dexless', 14)
     return svg(840, 880, s, 'Jason Avalos — animated ASCII GitHub avatar')
 

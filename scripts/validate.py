@@ -17,5 +17,5 @@ for name in ('portrait.svg', 'stats.svg', 'contrib-heatmap.svg'):
         assert not any(k.lower().startswith('on') for k in node.attrib)
         assert not any('href' in k for k in node.attrib)
 for path in re.findall(r'src="\./([^"]+)"', (root/'README.md').read_text()):
-    assert (root/path).is_file(), path
+    assert (root/path.split('?', 1)[0]).is_file(), path
 print('SVG safety, real-data totals, and README asset paths validated')

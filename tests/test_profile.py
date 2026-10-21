@@ -40,10 +40,25 @@ class PortraitTests(unittest.TestCase):
         ns = {'s': 'http://www.w3.org/2000/svg'}
         rows = [e for e in tree.findall('.//s:text', ns) if e.get('class') == 'row']
         occupied = [(i, e.text or '') for i, e in enumerate(rows) if (e.text or '').strip()]
-        width = max(len(line.strip()) for _, line in occupied) / 180
-        height = len(occupied) / 96
+        width = max((max(map(float, e.get('x').split())) - min(map(float, e.get('x').split())) + 800/180) / 800 for e in rows if e.text)
+        height = (max(float(e.get('y')) for e in rows) - min(float(e.get('y')) for e in rows) + 800/96) / 800
         self.assertAlmostEqual(width, height, delta=.05)
         clip = tree.find('.//s:clipPath/s:rect', ns)
         self.assertIsNotNone(clip)
         self.assertEqual(clip.get('width'), clip.get('height'))
         self.assertIsNotNone(tree.find('.//s:g[@clip-path="url(#portrait-bounds)"]', ns))
+
+    def test_glyphs_use_fixed_grid_positions_and_animation_repeats(self):
+        import xml.etree.ElementTree as ET
+        from scripts.profile_art import portrait
+        tree = ET.fromstring(portrait())
+        ns = {'s': 'http://www.w3.org/2000/svg'}
+        rows = [e for e in tree.findall('.//s:text', ns) if e.get('class') == 'row']
+        for row in rows:
+            self.assertIsNone(row.get('textLength'))
+            xs = [float(x) for x in row.get('x').split()]
+            self.assertEqual(len(xs), len(row.text or ''))
+            self.assertTrue(all(20 <= x < 820 for x in xs))
+        animation = tree.find('.//s:clipPath/s:rect/s:animate', ns)
+        self.assertIsNotNone(animation)
+        self.assertEqual(animation.get('repeatCount'), 'indefinite')

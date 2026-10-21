@@ -25,7 +25,9 @@ Counts reflect whatever GitHub publicly exposes, which can include anonymized
 private contribution counts if enabled in account settings.
 
 The avatar is stored at `assets/avatar.jpg`; replace it to change the portrait.
-The generated SVGs contain CSS animations and no scripts or external resources.
+The generated SVGs contain repeating CSS/SVG animations and no scripts or external resources.
+Animations repeat every 12 seconds. ASCII glyphs use explicit grid positions to
+preserve proportions independently of browser whitespace handling.
 Reduced-motion users see the completed artwork immediately. At narrow widths the
 paired panels scale with the README table; fine ASCII details will be smaller.
 

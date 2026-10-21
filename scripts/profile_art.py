@@ -70,12 +70,12 @@ def text(x, y, value, size=20, color='#7d8590', extra=''):
 def svg(w, h, content, title):
     return f'''<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="{escape(title)}" font-family="ui-monospace,Menlo,Consolas,monospace">
 <title>{escape(title)}</title><style>
-@keyframes appear{{from{{opacity:0;transform:translateY(10px)}}to{{opacity:1;transform:translateY(0)}}}}
-@keyframes grow{{from{{transform:scaleY(0)}}to{{transform:scaleY(1)}}}}
+@keyframes appear{{0%,3%{{opacity:0;transform:translateY(10px)}}15%,100%{{opacity:1;transform:translateY(0)}}}}
+@keyframes grow{{0%,8%{{transform:scaleY(0)}}25%,100%{{transform:scaleY(1)}}}}
 @keyframes type{{from{{clip-path:inset(0 100% 0 0)}}to{{clip-path:inset(0 0 0 0)}}}}
-.reveal{{animation:appear .5s ease-out both}}.bar{{transform-box:fill-box;transform-origin:bottom;animation:grow .7s ease-out both}}
-.row{{animation:type .1s linear both}}
-@media(prefers-reduced-motion:reduce){{.reveal,.bar,.row{{animation:none!important}}}}
+.reveal{{animation:appear 12s ease-out infinite both}}.bar{{transform-box:fill-box;transform-origin:bottom;animation:grow 12s ease-out infinite both}}
+.row{{font-variant-ligatures:none}}
+@media(prefers-reduced-motion:reduce){{.reveal,.bar,.row{{animation:none!important}}#portrait-bounds rect{{height:800px!important}}}}
 </style>{content}</svg>'''
 
 def window(command):
@@ -114,14 +114,20 @@ def portrait():
     im = ImageEnhance.Contrast(ImageOps.autocontrast(im)).enhance(1.3)
     ramp = ' .,:;irsXA253hMHGS#9B&@'
     s = window('whoami')
-    s += '<defs><clipPath id="portrait-bounds"><rect x="20" y="40" width="800" height="800"/></clipPath></defs><g clip-path="url(#portrait-bounds)">'
+    s += '<defs><clipPath id="portrait-bounds"><rect x="20" y="40" width="800" height="800"><animate attributeName="height" values="0;0;800;800" keyTimes="0;0.08;0.58;1" dur="12s" repeatCount="indefinite"/></rect></clipPath></defs><g clip-path="url(#portrait-bounds)">'
     for y in range(96):
         line = ''
         for x in range(180):
             r, g, b = color.getpixel((x, y))
             background = g > r * 1.08 and g > b * 1.04
             line += ' ' if background else ramp[im.getpixel((x,y))*(len(ramp)-1)//255]
-        s += text(20, 47.4+y*(800/96), line, 7.4, '#c9d1d9', f'class="row" xml:space="preserve" textLength="800" lengthAdjust="spacingAndGlyphs" style="animation-delay:{y*.06:.2f}s"')
+        # Explicit glyph coordinates avoid SVG textLength redistributing spaces.
+        # Browser whitespace handling must never change the source pixel grid.
+        visible = [(x, ch) for x, ch in enumerate(line) if ch != ' ']
+        if visible:
+            positions = ' '.join(f'{20+x*800/180:.3f}' for x, _ in visible)
+            s += text(positions, 47.4+y*(800/96), ''.join(ch for _, ch in visible),
+                      7.4, '#c9d1d9', 'class="row"')
     s += '</g>'
     s += text(20, 860, 'Jason Avalos · Dexless', 14)
     return svg(840, 880, s, 'Jason Avalos — animated ASCII GitHub avatar')

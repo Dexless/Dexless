@@ -1,0 +1,32 @@
+name: Refresh profile art
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: profile-art-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r scripts/requirements.txt
+      - run: python -m unittest discover -s tests
+      - run: python scripts/profile_art.py
+      - run: python scripts/validate.py
+      - name: Commit refreshed graphics as Jason
+        run: |
+          git config user.name 'Jason'
+          git config user.email 'jasonavalos@mail.fresnostate.edu'
+          git add portrait.svg stats.svg contrib-heatmap.svg data/contributions.json
+          if ! git diff --cached --quiet; then
+            git -c commit.gpgsign=false commit -m 'Refresh profile contribution art'
+            git push
+          fi

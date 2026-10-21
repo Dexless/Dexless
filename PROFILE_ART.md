@@ -25,8 +25,10 @@ Counts reflect whatever GitHub publicly exposes, which can include anonymized
 private contribution counts if enabled in account settings.
 
 The avatar is stored at `assets/avatar.jpg`; replace it to change the portrait.
-The generated SVGs contain repeating CSS/SVG animations and no scripts or external resources.
-Animations repeat every 12 seconds. ASCII glyphs use explicit grid positions to
+The generated SVGs contain one-shot CSS/SVG animations and no scripts or external resources.
+Animations play once on image load and hold their final state. The portrait scans
+row by row over about 5.8 seconds; cells pop into place over about 4 seconds;
+statistics count up and monthly bars grow in. ASCII glyphs use explicit grid positions to
 preserve proportions independently of browser whitespace handling.
 Reduced-motion users see the completed artwork immediately. At narrow widths the
 paired panels scale with the README table; fine ASCII details will be smaller.

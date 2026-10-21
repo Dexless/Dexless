@@ -2,7 +2,7 @@
 
 <h3><code>Dexless@github ~ $ ./contributions.sh</code></h3>
 
-<img src="./contrib-heatmap.svg?v=3" width="860" alt="Dexless's real GitHub contributions — refreshed daily" />
+<img src="./contrib-heatmap.svg?v=4" width="860" alt="Dexless's real GitHub contributions — refreshed daily" />
 
 <br>
 <br>
@@ -11,8 +11,8 @@
 
 <table>
 <tr>
-<td width="50%" valign="top"><img src="./portrait.svg?v=3" width="420" alt="Jason Avalos — animated ASCII portrait" /></td>
-<td width="50%" valign="top"><img src="./stats.svg?v=3" width="420" alt="Dexless's contribution statistics and monthly activity" /></td>
+<td width="50%" valign="top"><img src="./portrait.svg?v=4" width="420" alt="Jason Avalos — animated ASCII portrait" /></td>
+<td width="50%" valign="top"><img src="./stats.svg?v=4" width="420" alt="Dexless's contribution statistics and monthly activity" /></td>
 </tr>
 </table>
 

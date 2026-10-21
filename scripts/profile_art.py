@@ -70,12 +70,13 @@ def text(x, y, value, size=20, color='#7d8590', extra=''):
 def svg(w, h, content, title):
     return f'''<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="{escape(title)}" font-family="ui-monospace,Menlo,Consolas,monospace">
 <title>{escape(title)}</title><style>
-@keyframes appear{{0%,3%{{opacity:0;transform:translateY(10px)}}15%,100%{{opacity:1;transform:translateY(0)}}}}
-@keyframes grow{{0%,8%{{transform:scaleY(0)}}25%,100%{{transform:scaleY(1)}}}}
-@keyframes type{{from{{clip-path:inset(0 100% 0 0)}}to{{clip-path:inset(0 0 0 0)}}}}
-.reveal{{animation:appear 12s ease-out infinite both}}.bar{{transform-box:fill-box;transform-origin:bottom;animation:grow 12s ease-out infinite both}}
+@keyframes appear{{from{{opacity:0;transform:translateY(14px)}}to{{opacity:1;transform:translateY(0)}}}}
+@keyframes grow{{from{{transform:scaleY(0)}}to{{transform:scaleY(1)}}}}
+@keyframes pop{{0%{{opacity:0;transform:scale(.2);filter:brightness(2.4)}}60%{{opacity:1;transform:scale(1.1)}}100%{{opacity:1;transform:scale(1);filter:brightness(1)}}}}
+.reveal{{animation:appear .45s ease-out both}}.bar{{transform-box:fill-box;transform-origin:bottom;animation:grow .6s ease-out both}}
+.cell{{transform-box:fill-box;transform-origin:center;animation:pop .55s ease-out both}}
 .row{{font-variant-ligatures:none}}
-@media(prefers-reduced-motion:reduce){{.reveal,.bar,.row{{animation:none!important}}#portrait-bounds rect{{height:800px!important}}}}
+@media(prefers-reduced-motion:reduce){{.reveal,.bar,.cell{{animation:none!important}}.scan-clip{{width:800px!important}}.scan-cursor,.count-frame{{display:none!important}}.final-number{{visibility:visible!important}}}}
 </style>{content}</svg>'''
 
 def window(command):
@@ -101,7 +102,7 @@ def heatmap(days, stats):
     for day in days:
         offset = (date.fromisoformat(day['date'])-start).days
         col, row = divmod(offset, 7)
-        s += f'<rect class="reveal" x="{34+col*16}" y="{24+row*16}" width="13" height="13" rx="2.5" fill="{PALETTE[day["level"]]}" style="animation-delay:{(col+row*.5)*.065:.3f}s"><title>{day["date"]}: {day["count"]} contributions</title></rect>'
+        s += f'<rect class="cell" x="{34+col*16}" y="{24+row*16}" width="13" height="13" rx="2.5" fill="{PALETTE[day["level"]]}" style="animation-delay:{(col+row*.55)/((columns-1)+6*.55)*3.6:.3f}s"><title>{day["date"]}: {day["count"]} contributions</title></rect>'
     s += text(34, 152, f'{stats["total"]:,} contributions in the last year', 15, '#e6edf3')
     return svg(width, 160, s, 'Dexless contribution calendar')
 
@@ -114,7 +115,7 @@ def portrait():
     im = ImageEnhance.Contrast(ImageOps.autocontrast(im)).enhance(1.3)
     ramp = ' .,:;irsXA253hMHGS#9B&@'
     s = window('whoami')
-    s += '<defs><clipPath id="portrait-bounds"><rect x="20" y="40" width="800" height="800"><animate attributeName="height" values="0;0;800;800" keyTimes="0;0.08;0.58;1" dur="12s" repeatCount="indefinite"/></rect></clipPath></defs><g clip-path="url(#portrait-bounds)">'
+    s += '<defs><clipPath id="portrait-bounds"><rect x="20" y="40" width="800" height="800"/></clipPath></defs><g clip-path="url(#portrait-bounds)">'
     for y in range(96):
         line = ''
         for x in range(180):
@@ -126,8 +127,23 @@ def portrait():
         visible = [(x, ch) for x, ch in enumerate(line) if ch != ' ']
         if visible:
             positions = ' '.join(f'{20+x*800/180:.3f}' for x, _ in visible)
+            top = 40+y*(800/96)
+            begin, duration = y*5.8/96, 5.8/96
+            # One moving scan cursor reveals each row left-to-right, then stops.
+            s += (f'<defs><clipPath id="portrait-row-{y}"><rect class="scan-clip" '
+                  f'x="20" y="{top:.3f}" width="800" height="{800/96:.3f}">'
+                  f'<animate attributeName="width" from="0" to="800" begin="{begin:.4f}s" '
+                  f'dur="{duration:.4f}s" fill="freeze" backwards="true"/>'
+                  '</rect></clipPath></defs>')
+            # A set holds later rows closed until their scan starts.
+            s = s.replace('fill="freeze" backwards="true"/>',
+                          f'fill="freeze"/><set attributeName="width" to="0" begin="0s" dur="{begin:.4f}s"/>', 1) if begin else s.replace(' backwards="true"', '', 1)
+            s += f'<g clip-path="url(#portrait-row-{y})">'
             s += text(positions, 47.4+y*(800/96), ''.join(ch for _, ch in visible),
-                      7.4, '#c9d1d9', 'class="row"')
+                      7.4, '#c9d1d9', 'class="row"') + '</g>'
+            s += (f'<rect class="scan-cursor" x="20" y="{top+1:.3f}" width="4.44" height="6.33" fill="#c9d1d9" visibility="hidden">'
+                  f'<set attributeName="visibility" to="visible" begin="{begin:.4f}s" dur="{duration:.4f}s"/>'
+                  f'<animate attributeName="x" from="20" to="820" begin="{begin:.4f}s" dur="{duration:.4f}s" fill="freeze"/></rect>')
     s += '</g>'
     s += text(20, 860, 'Jason Avalos · Dexless', 14)
     return svg(840, 880, s, 'Jason Avalos — animated ASCII GitHub avatar')
@@ -144,7 +160,18 @@ def stats_card(stats, days):
         x, y = 20+(i%2)*408, 54+(i//2)*166
         s += f'<g class="reveal" style="animation-delay:{i*.15}s"><rect x="{x}" y="{y}" width="392" height="150" rx="10" fill="#161b22" stroke="#30363d"/>'
         s += text(x+22,y+39,'$ '+label,22)
-        s += text(x+22,y+99,f'{value:,}',54,'#39d353' if i == 0 else '#e6edf3')
+        ink = '#39d353' if i == 0 else '#e6edf3'
+        count_begin = i*.15+.27
+        for frame in range(16):
+            start = count_begin+frame*1.2/16
+            finish = start+1.2/16
+            number = value*(1-(1-(frame+1)/16)**3)
+            label_number = f'{number:,.1f}' if isinstance(value,float) else f'{round(number):,}'
+            content = text(x+22,y+99,label_number,54,ink,'class="count-frame" visibility="hidden"')
+            content = content.replace('</text>',f'<set attributeName="visibility" to="visible" begin="{start:.4f}s" dur="{finish-start:.4f}s"/></text>')
+            s += content
+        content = text(x+22,y+99,f'{value:,}',54,ink,'class="final-number" visibility="hidden"')
+        s += content.replace('</text>', f'<set attributeName="visibility" to="visible" begin="{count_begin+1.2:.4f}s" fill="freeze"/></text>')
         s += text(x+22,y+132,caption,17)+'</g>'
     s += '<rect x="20" y="552" width="800" height="308" rx="10" fill="#161b22" stroke="#30363d"/>'
     s += text(44,592,'$ contributions / month',22)

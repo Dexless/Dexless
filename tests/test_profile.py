@@ -48,7 +48,7 @@ class PortraitTests(unittest.TestCase):
         self.assertEqual(clip.get('width'), clip.get('height'))
         self.assertIsNotNone(tree.find('.//s:g[@clip-path="url(#portrait-bounds)"]', ns))
 
-    def test_glyphs_use_fixed_grid_positions_and_animation_repeats(self):
+    def test_glyphs_use_fixed_grid_positions_and_one_shot_animation(self):
         import xml.etree.ElementTree as ET
         from scripts.profile_art import portrait
         tree = ET.fromstring(portrait())
@@ -61,4 +61,7 @@ class PortraitTests(unittest.TestCase):
             self.assertTrue(all(20 <= x < 820 for x in xs))
         animation = tree.find('.//s:clipPath/s:rect/s:animate', ns)
         self.assertIsNotNone(animation)
-        self.assertEqual(animation.get('repeatCount'), 'indefinite')
+        self.assertEqual(animation.get('fill'), 'freeze')
+        self.assertNotIn('indefinite', profile_svg := portrait())
+        self.assertNotIn('infinite', profile_svg)
+        self.assertIn('portrait-row-', profile_svg)

@@ -1,13 +1,13 @@
 <div align="center">
 
-<h3><code>Dexless@github ~ $ ./contributions.sh</code></h3>
+<h3><code>Contributions</code></h3>
 
 <img src="./contrib-heatmap.svg?v=4" width="860" alt="Dexless's real GitHub contributions — refreshed daily" />
 
 <br>
 <br>
 
-<h3><code>Dexless@github ~ $ whoami</code></h3>
+<h3><code>Stats</code></h3>
 
 <table>
 <tr>
@@ -19,7 +19,7 @@
 <br>
 <br>
 
-<h3><code>Dexless@github ~ $ ./links.sh</code></h3>
+<h3><code>About Me</code></h3>
 
 <p><b>Computer Science Student · Research Software · C++ &amp; Python</b></p>
 
